@@ -3,6 +3,8 @@ package plan
 import (
 	"context"
 	"sort"
+
+	"github.com/influxdata/flux/dependencies/testing"
 )
 
 // heuristicPlanner applies a set of rules to the nodes in a Spec
@@ -51,8 +53,11 @@ func (p *heuristicPlanner) matchRules(ctx context.Context, node Node) (Node, boo
 			newNode, changed, err := rule.Rewrite(ctx, node)
 			if err != nil {
 				return nil, false, err
+			} else if !changed {
+				continue
 			}
-			anyChanged = anyChanged || changed
+			testing.MarkInvokedPlannerRule(ctx, rule.Name())
+			anyChanged = true
 			node = newNode
 		}
 	}
@@ -65,8 +70,11 @@ func (p *heuristicPlanner) matchRules(ctx context.Context, node Node) (Node, boo
 			newNode, changed, err := rule.Rewrite(ctx, node)
 			if err != nil {
 				return nil, false, err
+			} else if !changed {
+				continue
 			}
-			anyChanged = anyChanged || changed
+			testing.MarkInvokedPlannerRule(ctx, rule.Name())
+			anyChanged = true
 			node = newNode
 		}
 	}
